@@ -43,11 +43,11 @@ def play_michael_jackson(profile):
   the_king_of_pop = 0
   return the_king_of_pop
   
-def I_dont_like_the_drugs_but_the_drugs_like_me(agent, history):
+def i_dont_like_the_drugs_but_the_drugs_like_me(agent, history):
   agent[1] += 1
   
 if __name__ == "__main__":
-  room = Room(everyone_is_unique, play_michael_jackson, I_dont_like_the_drugs_but_the_drugs_like_me, 0, 3)
+  room = Room(everyone_is_unique, play_michael_jackson, i_dont_like_the_drugs_but_the_drugs_like_me, 0, 3)
   for i in range(0,5):
     room.next_period()
     room.print_state()
