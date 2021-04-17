@@ -28,7 +28,18 @@ def k_approval_scores(k, m):
 
 def trunc_Borda_scores(k, m):
     return [*range(k, 0, -1)]+[0 for i in range(m-k)]
+  
+def garmonic_scores(m):
+    return [1/i for i in range(1, m+1)]
 
+def geometric_scores(p, m):
+    if p > 1:
+        return [p**(m-i) for i in range(1, m+1)]
+    if p == 1:
+        return [m-i for i in range(1, m+1)]
+    if p < 1:
+        return [(1 - p**(m-i)) for i in range(1, m+1)]
+  
 def dict_positions(profile):
     candidates_names = profile.candidates_names()
     candidates_num = profile.candidates_num()
