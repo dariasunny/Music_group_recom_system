@@ -183,6 +183,21 @@ class TestScores(unittest.TestCase):
     
     def test_trunc_Borda_scores2(self):
         self.assertEqual(trunc_Borda_scores(2, 10), [2, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+    
+    def test_garmonic_scores(self):
+        self.assertEqual(garmonic_scores(3), [1, 1/2, 1/3])
+        
+    def test_garmonic_scores_big(self):
+        self.assertEqual(garmonic_scores(10), [1, 1/2, 1/3, 1/4, 1/5, 1/6, 1/7, 1/8, 1/9, 1/10])
+
+    def test_geometric_scores_lesser1(self):
+        self.assertEqual([round(i, 4) for i in geometric_scores(0.8, 5)], [0.5904, 0.488, 0.36, 0.2, 0])
+
+    def test_geometric_scores_bigger1(self):
+        self.assertEqual([round(i, 4) for i in geometric_scores(1.5, 5)], [5.0625, 3.375, 2.25, 1.5, 1])
+
+    def test_geometric_scores_equal1(self):
+        self.assertEqual(geometric_scores(1, 5), [4, 3, 2, 1, 0])
 
     def test_dict_positions(self):
         p = Profile([[1, 2, 3], [1, 2, 3], [2, 3, 1], [1, 3, 2]])
