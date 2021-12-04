@@ -2,6 +2,7 @@ import numpy as np
 from numpy.random import default_rng
 import pandas as pd
 import random
+import matplotlib.pyplot as plt
 
 class Profile:
   def __init__(self, preferences):
@@ -163,6 +164,8 @@ class Room:
     self.number_of_genres = number_of_genres
     self.agents = []
     self.history = []
+    self.all_happy = []
+    self.average_happiness = []
     
   def get_profile(self):
     preferences = [agent.preferences for agent in self.agents]
@@ -181,12 +184,30 @@ class Room:
     for agent in self.agents:
       agent.history.append(new_track)
     self.update_agents()
+
+  def sum_happiness(self):
+    sum_happ = 0
+    for agent in self.agents:
+      sum_happ += agent.happiness
+    self.all_happy.append(sum_happ)
+    return sum_happ
+
+  def average_happy(self):
+    sum_happ = 0
+    for agent in self.agents:
+      sum_happ += agent.happiness
+    average_hap = sum_happ/len(self.agents)
+    self.average_happiness.append(average_hap)
     
   def print_state(self):
-    print("Tracks played: " + str(self.history))
-    print("Currently in room:")
-    for agent in self.agents:
-      print(str(agent.preferences) + ", happiness: " + str(agent.happiness))
+      print("Tracks played: " + str(self.history))
+      print("Currently in room:")
+      for agent in self.agents:
+        print(str(agent.preferences) + ", happiness: " + str(agent.happiness))
+      print("all happy: " + str(self.sum_happiness()))
+      self.average_happy()
+      print("average happy: " + str(self.average_happiness[-1]))
+
   
 def everyone_is_unique(m):
   initial_happiness = 0
@@ -255,6 +276,7 @@ def article_happy_nul(agent, history):
 
 def i_dont_like_the_drugs_but_the_drugs_like_me(agent, history):
   agent.happiness += 1
+
   
 if __name__ == "__main__":
   m=3
@@ -266,8 +288,15 @@ if __name__ == "__main__":
   # lambda y: borda_truncated(y, 2)
   # harmonic
   # lambda z: geometric(z, 0.8)
-  room = Room(lambda x: Euclidean_agent(candidates,k), plurality, article_happy_nul, 0, m)
-  for i in range(0,5):
-    room.next_period()
-    room.print_state()
-    print("")
+  averages = []
+  summas = []
+  th_range =  np.arange(0,2,0.25)
+  for th in th_range:
+    room = Room(lambda x: Euclidean_agent(candidates,k), harmonic, article_happy_nul, th, m)
+    for i in range(0,10):
+      print(th)
+      room.next_period()
+      room.print_state()
+      print("")
+    summas.append(room.all_happy)
+    averages.append(room.average_happiness)
