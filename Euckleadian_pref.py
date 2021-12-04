@@ -166,6 +166,7 @@ class Room:
     self.history = []
     self.all_happy = []
     self.average_happiness = []
+    self.number_of_people = []
     
   def get_profile(self):
     preferences = [agent.preferences for agent in self.agents]
@@ -196,8 +197,12 @@ class Room:
     sum_happ = 0
     for agent in self.agents:
       sum_happ += agent.happiness
-    average_hap = sum_happ/len(self.agents)
+    average_hap = 0 if len(self.agents)==0 else sum_happ/len(self.agents)
     self.average_happiness.append(average_hap)
+
+  def number_of_quest(self):
+    self.number_of_people.append(len(self.agents))
+    return len(self.agents)
     
   def print_state(self):
       print("Tracks played: " + str(self.history))
@@ -207,6 +212,7 @@ class Room:
       print("all happy: " + str(self.sum_happiness()))
       self.average_happy()
       print("average happy: " + str(self.average_happiness[-1]))
+      print("number of people: " + str(self.number_of_quest()))
 
   
 def everyone_is_unique(m):
@@ -248,7 +254,7 @@ def Euclidean_agent(candidates, k):
   for j in sorted_distance:
       candidate_name = j[0]
       preferences.append(candidate_name)
-  return Agent(preferences, 0)
+  return Agent(preferences, len(candidates))
   
 def play_michael_jackson(profile):
   the_king_of_pop = 0
@@ -279,24 +285,68 @@ def i_dont_like_the_drugs_but_the_drugs_like_me(agent, history):
 
   
 if __name__ == "__main__":
-  m=3
-  #k=3
-  #candidates = Euclidean_candidates(m,k)
+  m=5
+  k=3
+  candidates = Euclidean_candidates(m,k)
   # plurality
+
+  averages_plurality = []
+  summas_plurality = []
+  number_of_quests_plurality = []
+  th_range =  np.arange(0,5,0.5)
+  for th in th_range:
+    room = Room(lambda x: Euclidean_agent(candidates,k), plurality, article_happy_nul, th, m)
+    for i in range(0,100):
+      #print(th)
+      room.next_period()
+      room.print_state()
+      #print("")
+    summas_plurality.append(room.all_happy)
+    averages_plurality.append(room.average_happiness)
+    number_of_quests_plurality.append(room.number_of_people)
   # borda
+  averages_borda = []
+  summas_borda = []
+  number_of_quests_borda = []
+  th_range =  np.arange(0,5,0.5)
+  for th in th_range:
+    room = Room(lambda x: Euclidean_agent(candidates,k), borda, article_happy_nul, th, m)
+    for i in range(0,100):
+      #print(th)
+      room.next_period()
+      room.print_state()
+      #print("")
+    summas_borda.append(room.all_happy)
+    averages_borda.append(room.average_happiness)
+    number_of_quests_borda.append(room.number_of_people)
   # lambda y: k_approval(y,k=2)
+
   # lambda y: borda_truncated(y, 2)
   # harmonic
   # lambda z: geometric(z, 0.8)
-  averages = []
-  summas = []
-  th_range =  np.arange(0,2,0.25)
+  averages_harmonic = []
+  summas_harmonic = []
+  number_of_quests_harmonic = []
+  th_range =  np.arange(0,5,0.5)
   for th in th_range:
     room = Room(lambda x: Euclidean_agent(candidates,k), harmonic, article_happy_nul, th, m)
-    for i in range(0,10):
-      print(th)
+    for i in range(0,100):
+      #print(th)
       room.next_period()
       room.print_state()
-      print("")
-    summas.append(room.all_happy)
-    averages.append(room.average_happiness)
+      #print("")
+    summas_harmonic.append(room.all_happy)
+    averages_harmonic.append(room.average_happiness)
+    number_of_quests_harmonic.append(room.number_of_people)
+
+#experiments
+plt.plot(range(1,101), number_of_quests_harmonic[8], label='harmonic')
+plt.plot(range(1,101), number_of_quests_borda[8], label='borda')
+plt.plot(range(1,101), number_of_quests_plurality[8], label='plurality')
+plt.xlabel('Number of iterations')
+# naming the y axis
+plt.ylabel('People ')
+# giving a title to my graph
+plt.title('EU, Tresh = 3')
+plt.legend()
+plt.show()
