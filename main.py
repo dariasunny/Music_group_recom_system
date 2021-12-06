@@ -1,7 +1,7 @@
 class Profile:
-  def __init__(self, preferences):
+    def __init__(self, preferences):
       self._preferences = preferences
-  def agents_num(self):
+    def agents_num(self):
         return len(self._preferences)
     def candidates_num(self):
         return len(self._preferences[0])

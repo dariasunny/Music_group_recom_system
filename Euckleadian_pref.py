@@ -154,6 +154,9 @@ class Agent:
     self.happiness = happiness
     self.preferences = preferences
     self.history = []
+    self.happiness_threshold = np.random.normal(2.5, 1)
+    self.patience = np.random.normal(0.1, 0.05)
+    self.delta = np.random.uniform(0, 1)
 
 class Room:
   def __init__(self, generate_new_agent, play_track, update_happiness, happiness_threshold, number_of_genres):
@@ -175,7 +178,7 @@ class Room:
   def update_agents(self):
     for agent in self.agents:
       self.update_happiness(agent, agent.history)
-    self.agents = [agent for agent in self.agents if agent.happiness>= self.happiness_threshold]
+    self.agents = [agent for agent in self.agents if agent.happiness>= agent.happiness_threshold]
     
   def next_period(self):
     new_agent = self.generate_new_agent(self.number_of_genres)
@@ -280,6 +283,12 @@ def article_happy_nul(agent, history):
   agent.happiness = agent.happiness* 0.8
   agent.happiness += score
 
+def article_happiness_updated(agent, history):
+    songs = history[-1]
+    song_rank = agent.preferences.index(songs[0])
+    impact = len(agent.preferences) - song_rank - 1
+    agent.happiness = (agent.happiness * agent.delta + impact ) / ( 1 + agent.delta)
+
 def i_dont_like_the_drugs_but_the_drugs_like_me(agent, history):
   agent.happiness += 1
 
@@ -295,7 +304,7 @@ if __name__ == "__main__":
   number_of_quests_plurality = []
   th_range =  np.arange(0,5,0.5)
   for th in th_range:
-    room = Room(lambda x: Euclidean_agent(candidates,k), plurality, article_happy_nul, th, m)
+    room = Room(lambda x: Euclidean_agent(candidates,k), plurality, article_happiness_updated, th, m)
     for i in range(0,100):
       #print(th)
       room.next_period()
@@ -310,7 +319,7 @@ if __name__ == "__main__":
   number_of_quests_borda = []
   th_range =  np.arange(0,5,0.5)
   for th in th_range:
-    room = Room(lambda x: Euclidean_agent(candidates,k), borda, article_happy_nul, th, m)
+    room = Room(lambda x: Euclidean_agent(candidates,k), borda, article_happiness_updated, th, m)
     for i in range(0,100):
       #print(th)
       room.next_period()
@@ -329,7 +338,61 @@ if __name__ == "__main__":
   number_of_quests_harmonic = []
   th_range =  np.arange(0,5,0.5)
   for th in th_range:
-    room = Room(lambda x: Euclidean_agent(candidates,k), harmonic, article_happy_nul, th, m)
+    room = Room(lambda x: Euclidean_agent(candidates,k), harmonic, article_happiness_updated, th, m)
+    for i in range(0,100):
+      #print(th)
+      room.next_period()
+      room.print_state()
+      #print("")
+    summas_harmonic.append(room.all_happy)
+    averages_harmonic.append(room.average_happiness)
+    number_of_quests_harmonic.append(room.number_of_people)
+
+if __name__ == "__main__":
+  m=5
+  k=3
+  # plurality
+
+  averages_plurality = []
+  summas_plurality = []
+  number_of_quests_plurality = []
+  th_range =  np.arange(0,5,0.5)
+  for th in th_range:
+    room = Room(lambda x:  IC_preference(m), plurality, article_happiness_updated, th, m)
+    for i in range(0,100):
+      #print(th)
+      room.next_period()
+      room.print_state()
+      #print("")
+    summas_plurality.append(room.all_happy)
+    averages_plurality.append(room.average_happiness)
+    number_of_quests_plurality.append(room.number_of_people)
+  # borda
+  averages_borda = []
+  summas_borda = []
+  number_of_quests_borda = []
+  th_range =  np.arange(0,5,0.5)
+  for th in th_range:
+    room = Room(lambda x:  IC_preference(m), borda, article_happiness_updated, th, m)
+    for i in range(0,100):
+      #print(th)
+      room.next_period()
+      room.print_state()
+      #print("")
+    summas_borda.append(room.all_happy)
+    averages_borda.append(room.average_happiness)
+    number_of_quests_borda.append(room.number_of_people)
+  # lambda y: k_approval(y,k=2)
+
+  # lambda y: borda_truncated(y, 2)
+  # harmonic
+  # lambda z: geometric(z, 0.8)
+  averages_harmonic = []
+  summas_harmonic = []
+  number_of_quests_harmonic = []
+  th_range =  np.arange(0,5,0.5)
+  for th in th_range:
+    room = Room(lambda x:  IC_preference(m), harmonic, article_happiness_updated, th, m)
     for i in range(0,100):
       #print(th)
       room.next_period()
@@ -340,13 +403,13 @@ if __name__ == "__main__":
     number_of_quests_harmonic.append(room.number_of_people)
 
 #experiments
-plt.plot(range(1,101), number_of_quests_harmonic[8], label='harmonic')
-plt.plot(range(1,101), number_of_quests_borda[8], label='borda')
-plt.plot(range(1,101), number_of_quests_plurality[8], label='plurality')
+plt.plot(range(1,101),  number_of_quests_harmonic[8], label='harmonic')
+plt.plot(range(1,101),  number_of_quests_borda[8], label='borda')
+plt.plot(range(1,101),  number_of_quests_plurality[8], label='plurality')
 plt.xlabel('Number of iterations')
 # naming the y axis
-plt.ylabel('People ')
+plt.ylabel('People')
 # giving a title to my graph
-plt.title('EU, Tresh = 3')
+plt.title('IC, updated happiness')
 plt.legend()
 plt.show()
